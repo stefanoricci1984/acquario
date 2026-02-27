@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 200 60% 96%;
+    --foreground: 210 50% 10%;
+
+    --card: 200 40% 98%;
+    --card-foreground: 210 50% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 50% 10%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 180 40% 90%;
+    --secondary-foreground: 210 50% 10%;
+
+    --muted: 200 30% 92%;
+    --muted-foreground: 210 15% 45%;
+
+    --accent: 340 82% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 200 25% 82%;
+    --input: 200 25% 82%;
+    --ring: 199 89% 48%;
+
+    --radius: 0.75rem;
+
+    --ocean-deep: 210 80% 20%;
+    --ocean-mid: 200 75% 35%;
+    --ocean-light: 195 70% 50%;
+    --ocean-surface: 190 60% 70%;
+    --sand: 40 50% 75%;
+    --coral: 16 85% 60%;
+    --seaweed: 150 60% 40%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 210 80% 8%;
+    --foreground: 200 30% 92%;
+
+    --card: 210 70% 12%;
+    --card-foreground: 200 30% 92%;
+
+    --popover: 210 70% 12%;
+    --popover-foreground: 200 30% 92%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 50% 18%;
+    --secondary-foreground: 200 30% 92%;
+
+    --muted: 210 40% 16%;
+    --muted-foreground: 200 20% 60%;
+
+    --accent: 340 82% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 40% 20%;
+    --input: 210 40% 20%;
+    --ring: 199 89% 48%;
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Fredoka', 'Nunito', sans-serif;
+  }
+}
+
+@layer utilities {
+  .ocean-gradient {
+    background: linear-gradient(
+      180deg,
+      hsl(195, 70%, 50%) 0%,
+      hsl(200, 75%, 35%) 40%,
+      hsl(210, 80%, 20%) 100%
+    );
+  }
+
+  /* Movimento a onda: orizzontale + curve su e giù armoniche */
+  @keyframes swim-right {
+    0%   { transform: translate(-150px, 0) scaleX(1); }
+    24.5% { transform: translate(calc(50vw - 50px), -22px) scaleX(1); }
+    49%  { transform: translate(calc(100vw + 50px), 0) scaleX(1); }
+    50%  { transform: translate(calc(100vw + 50px), 0) scaleX(-1); }
+    74.5% { transform: translate(calc(50vw - 50px), 22px) scaleX(-1); }
+    99%  { transform: translate(-150px, 0) scaleX(-1); }
+    100% { transform: translate(-150px, 0) scaleX(1); }
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @keyframes bubble-rise {
+    0% { transform: translateY(0) scale(1); opacity: 0.75; }
+    100% { transform: translateY(-100vh) scale(1.4); opacity: 0; }
+  }
+
+  @keyframes plant-sway {
+    0%, 100% { transform: skewX(-2deg); }
+    50% { transform: skewX(3deg); }
+  }
+
+  .animate-plant-sway {
+    animation: plant-sway var(--plant-duration, 5s) ease-in-out infinite;
+    animation-delay: var(--plant-delay, 0s);
+  }
+
+  .animate-swim {
+    animation: swim-right var(--swim-duration, 15s) linear infinite;
+    animation-delay: var(--swim-delay, 0s);
+  }
+
+  .animate-bob {
+    animation: bob 3s ease-in-out infinite;
+    animation-delay: var(--bob-delay, 0s);
+  }
+
+  .animate-bubble {
+    animation: bubble-rise var(--bubble-duration, 8s) ease-in infinite;
+    animation-delay: var(--bubble-delay, 0s);
+  }
+}
