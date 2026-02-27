@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -333,6 +333,11 @@ const AquariumPage: React.FC = () => {
   const [seasonEndTs, setSeasonEndTs] = useState<number>(0);
   const [countdownMs, setCountdownMs] = useState<number>(0);
 
+  const refreshFish = useCallback(async () => {
+    const list = await getFish();
+    setAllFish(list);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -345,6 +350,23 @@ const AquariumPage: React.FC = () => {
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
+  }, []);
+
+  /* Aggiorna i pesci quando si torna sulla scheda (es. dopo aver aggiunto un pesce in un altro tab) */
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") void refreshFish();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [refreshFish]);
+
+  /* Polling: aggiorna la lista pesci ogni 20s mentre la scheda è visibile */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") void refreshFish();
+    }, 20000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
