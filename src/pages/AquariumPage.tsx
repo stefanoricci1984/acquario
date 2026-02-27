@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Fish as FishIcon, ThumbsUp, ThumbsDown, Trophy, Pencil, Crown } from "lucide-react";
+import { toast } from "sonner";
 import {
   getFish,
   updateFishVotes,
@@ -10,6 +11,11 @@ import {
   endSeasonKeepTop3,
   type Fish,
 } from "@/lib/fishStore";
+import {
+  getCooldownRemainingMs,
+  setVoteCooldown,
+  VOTE_COOLDOWN_MS,
+} from "@/lib/voteCooldown";
 
 const Bubble: React.FC<{ delay: number; left: number; duration: number; size: number }> = ({
   delay, left, duration, size,
@@ -419,7 +425,28 @@ const AquariumPage: React.FC = () => {
     return map;
   }, [ranked, distinctScoresAll]);
 
+  const [cooldownRemainingMs, setCooldownRemainingMs] = useState<number>(0);
+
+  useEffect(() => {
+    if (!selected) return;
+    const update = () => setCooldownRemainingMs(getCooldownRemainingMs(selected.id));
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, [selected?.id]);
+
   const vote = (id: string, type: "like" | "dislike") => {
+    const remaining = getCooldownRemainingMs(id);
+    if (remaining > 0) {
+      const m = Math.floor(remaining / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      toast.warning(
+        "È permesso un solo like o dislike ogni 5 minuti. Potrai votare di nuovo tra " +
+          `${m}:${String(s).padStart(2, "0")}`
+      );
+      return;
+    }
+    setVoteCooldown(id);
     setAllFish((prev) =>
       prev.map((f) => {
         if (f.id !== id) return f;
@@ -441,6 +468,13 @@ const AquariumPage: React.FC = () => {
           }
         : prev
     );
+    setCooldownRemainingMs(VOTE_COOLDOWN_MS);
+  };
+
+  const formatCooldown = (ms: number) => {
+    const m = Math.floor(ms / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    return `${m}:${String(s).padStart(2, "0")}`;
   };
 
   return (
@@ -564,11 +598,22 @@ const AquariumPage: React.FC = () => {
                 alt={selected.name}
                 className="w-40 h-32 object-contain rounded-lg bg-muted p-2"
               />
+              {cooldownRemainingMs > 0 ? (
+                <div className="text-center space-y-2 w-full rounded-lg bg-amber-500/15 border border-amber-500/30 px-3 py-2">
+                  <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                    È permesso un solo like o dislike ogni 5 minuti.
+                  </p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    Potrai votare di nuovo tra <span className="font-mono font-bold tabular-nums">{formatCooldown(cooldownRemainingMs)}</span>
+                  </p>
+                </div>
+              ) : null}
               <div className="flex gap-4">
                 <Button
                   variant="outline"
                   size="lg"
                   className="flex-1 gap-2"
+                  disabled={cooldownRemainingMs > 0}
                   onClick={() => vote(selected.id, "like")}
                 >
                   <ThumbsUp className="w-5 h-5 text-green-500" />
@@ -578,6 +623,7 @@ const AquariumPage: React.FC = () => {
                   variant="outline"
                   size="lg"
                   className="flex-1 gap-2"
+                  disabled={cooldownRemainingMs > 0}
                   onClick={() => vote(selected.id, "dislike")}
                 >
                   <ThumbsDown className="w-5 h-5 text-red-500" />
