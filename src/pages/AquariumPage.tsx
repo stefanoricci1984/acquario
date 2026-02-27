@@ -324,6 +324,9 @@ function formatCountdown(ms: number): string {
   return `${d}g ${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m`;
 }
 
+/** Intervallo di aggiornamento lista pesci (polling), in millisecondi. Es: 10000 = 10s, 30000 = 30s */
+const FISH_REFRESH_INTERVAL_MS = 10000;
+
 const AquariumPage: React.FC = () => {
   const navigate = useNavigate();
   const [allFish, setAllFish] = useState<Fish[]>([]);
@@ -361,11 +364,11 @@ const AquariumPage: React.FC = () => {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, [refreshFish]);
 
-  /* Polling: aggiorna la lista pesci ogni 20s mentre la scheda è visibile */
+  /* Polling: aggiorna la lista pesci mentre la scheda è visibile (vedi FISH_REFRESH_INTERVAL_MS) */
   useEffect(() => {
     const interval = setInterval(() => {
       if (document.visibilityState === "visible") void refreshFish();
-    }, 20000);
+    }, FISH_REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);
   }, []);
 
